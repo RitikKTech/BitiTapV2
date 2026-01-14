@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, CheckCircle, XCircle, Clock, Bell } from 'lucide-react';
+// ✅ Zap Icon add kiya
+import { LayoutDashboard, Package, ShoppingCart, Settings, CheckCircle, XCircle, Clock, Bell, Zap } from 'lucide-react';
 import './Dashboard.css';
 
 // 🔔 SOUND URL (Simple Beep if you don't have file)
@@ -74,6 +75,7 @@ const Orders = () => {
 
     return (
         <div className="dashboard-container">
+            {/* 🟢 SIDEBAR FIXED (Added Upgrade Tab) */}
             <aside className="sidebar">
                 <div className="sidebar-logo">bititap</div>
                 <nav style={{display:'flex', width:'100%', flexDirection:'inherit', justifyContent:'inherit', gap:'inherit'}}>
@@ -81,6 +83,10 @@ const Orders = () => {
                     <Link to="/free/products" className="nav-item"><Package size={20}/> <span>Products</span></Link>
                     <Link to="/free/orders" className="nav-item active"><ShoppingCart size={20}/> <span>Sales</span></Link>
                     <Link to="/free/settings" className="nav-item"><Settings size={20}/> <span>Settings</span></Link>
+                    {/* ✅ New Upgrade Tab */}
+                    <Link to="/free/upgrade" className="nav-item" style={{color: '#d97706'}}>
+                        <Zap size={20}/> <span>Upgrade Plan</span>
+                    </Link>
                 </nav>
             </aside>
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, Trash2, ExternalLink, Edit, X, Save } from 'lucide-react';
+// ✅ Zap icon add kiya (Upgrade ke liye)
+import { LayoutDashboard, Package, ShoppingCart, Settings, Trash2, ExternalLink, Edit, X, Save, Zap } from 'lucide-react';
 import './Dashboard.css';
 
 const Products = () => {
@@ -10,7 +11,7 @@ const Products = () => {
     const [loading, setLoading] = useState(true);
 
     // 🛠️ EDIT STATE (Popup ke liye)
-    const [editingProduct, setEditingProduct] = useState(null); // Agar ye null nahi hai, to popup dikhega
+    const [editingProduct, setEditingProduct] = useState(null); 
     const [editForm, setEditForm] = useState({ title: '', price: '', description: '', file: null });
     const [updating, setUpdating] = useState(false);
 
@@ -42,7 +43,7 @@ const Products = () => {
             title: product.title, 
             price: product.price, 
             description: product.description,
-            file: null // File optional hai update karte waqt
+            file: null 
         });
     };
 
@@ -63,8 +64,8 @@ const Products = () => {
                 headers: { 'x-auth-token': token, 'Content-Type': 'multipart/form-data' }
             });
             alert("Product Updated Successfully! 🎉");
-            setEditingProduct(null); // Popup band karo
-            fetchProducts(); // List refresh karo
+            setEditingProduct(null); 
+            fetchProducts(); 
         } catch (err) {
             alert(err.response?.data?.message || "Error Updating Product");
         } finally { setUpdating(false); }
@@ -79,6 +80,11 @@ const Products = () => {
                     <Link to="/free/products" className={`nav-item ${location.pathname === '/free/products' ? 'active' : ''}`}><Package size={20}/> <span>Products</span></Link>
                     <Link to="/free/orders" className={`nav-item ${location.pathname === '/free/orders' ? 'active' : ''}`}><ShoppingCart size={20}/> <span>Sales</span></Link>
                     <Link to="/free/settings" className={`nav-item ${location.pathname === '/free/settings' ? 'active' : ''}`}><Settings size={20}/> <span>Settings</span></Link>
+                    
+                    {/* ✅ Upgrade Plan Link Added Here */}
+                    <Link to="/free/upgrade" className="nav-item" style={{color: '#d97706'}}>
+                        <Zap size={20}/> <span>Upgrade Plan</span>
+                    </Link>
                 </nav>
             </aside>
 
@@ -125,7 +131,6 @@ const Products = () => {
                                     <div style={{display:'flex', gap:'8px'}}>
                                         <button onClick={() => {navigator.clipboard.writeText(`http://localhost:3000/buy/${p._id}`); alert("Link Copied!");}} style={{background:'#e0e7ff', color:'#4f46e5', border:'none', padding:'8px', borderRadius:'8px', cursor:'pointer'}}><ExternalLink size={16}/></button>
                                         
-                                        {/* ✅ EDIT BUTTON working now */}
                                         <button onClick={() => handleEditClick(p)} style={{background:'#f3e8ff', color:'#7e22ce', border:'none', padding:'8px', borderRadius:'8px', cursor:'pointer'}}><Edit size={16}/></button>
                                         
                                         <button onClick={() => handleDelete(p._id)} style={{background:'#fee2e2', color:'#ef4444', border:'none', padding:'8px', borderRadius:'8px', cursor:'pointer'}}><Trash2 size={16}/></button>

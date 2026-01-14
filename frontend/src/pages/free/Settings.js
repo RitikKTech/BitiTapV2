@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, Save, LogOut, UploadCloud, RefreshCw } from 'lucide-react';
+// ✅ Zap Icon add kiya (Upgrade Tab ke liye)
+import { LayoutDashboard, Package, ShoppingCart, Settings, Save, LogOut, UploadCloud, RefreshCw, Zap } from 'lucide-react';
 import './Dashboard.css';
 
 const SettingsPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
-    // States (Old Logic + New Preview States)
+    // States
     const [form, setForm] = useState({ upiId: '', autoApprove: false });
     const [currentQrUrl, setCurrentQrUrl] = useState(''); // Database wala QR
-    const [qrFile, setQrFile] = useState(null); // Nayi file
-    const [previewUrl, setPreviewUrl] = useState(null); // Live Preview
+    const [qrFile, setQrFile] = useState(null); // Nayi file upload ke liye
+    const [previewUrl, setPreviewUrl] = useState(null); // Live Preview ke liye
     
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -21,8 +22,10 @@ const SettingsPage = () => {
     useEffect(() => {
         const fetchSettings = async () => {
             const token = localStorage.getItem('token');
+            if (!token) return navigate('/free/login');
+
             try {
-                // ✅ CORRECT URL: Backend me GET /api/free/settings banaya tha
+                // ✅ Backend GET Route: /api/free/settings
                 const res = await axios.get('http://localhost:5000/api/free/settings', { 
                     headers: { 'x-auth-token': token } 
                 });
@@ -39,11 +42,12 @@ const SettingsPage = () => {
                 setLoading(false);
             } catch (err) {
                 console.error("Error fetching settings:", err);
+                if(err.response?.status === 401) navigate('/free/login');
                 setLoading(false);
             }
         };
         fetchSettings();
-    }, []);
+    }, [navigate]);
 
     // 🔄 LIVE PREVIEW LOGIC
     const handleFileChange = (e) => {
@@ -63,20 +67,20 @@ const SettingsPage = () => {
         
         const formData = new FormData();
         formData.append('upiId', form.upiId);
-        formData.append('autoApprove', form.autoApprove);
+        formData.append('autoApprove', form.autoApprove); // Backend string me convert kar lega
         
-        // ✅ CRITICAL FIX 1: Backend 'qrCode' maang raha hai ('qrFile' nahi)
+        // ✅ Backend 'qrCode' maang raha hai
         if(qrFile) {
             formData.append('qrCode', qrFile); 
         }
 
         try {
-            // ✅ CRITICAL FIX 2: Route '/update' hai aur Method 'PUT' hai
+            // ✅ Backend PUT Route: /api/free/settings/update
             const res = await axios.put('http://localhost:5000/api/free/settings/update', formData, { 
                 headers: { 'x-auth-token': token, 'Content-Type': 'multipart/form-data' } 
             });
             
-            alert(res.data.message || "Settings Updated!");
+            alert(res.data.message || "Settings Updated Successfully! ✅");
             
             // Update hone ke baad Live View ko Permanent View bana do
             if(res.data.settings?.qrCodeUrl) {
@@ -104,6 +108,7 @@ const SettingsPage = () => {
 
     return (
         <div className="dashboard-container">
+            {/* 🟢 SIDEBAR (Upgrade Tab Added) */}
             <aside className="sidebar">
                 <div className="sidebar-logo">bititap</div>
                 <nav style={{display:'flex', width:'100%', flexDirection:'inherit', justifyContent:'inherit', gap:'inherit'}}>
@@ -111,21 +116,30 @@ const SettingsPage = () => {
                     <Link to="/free/products" className={`nav-item ${location.pathname === '/free/products' ? 'active' : ''}`}><Package size={20}/> <span>Products</span></Link>
                     <Link to="/free/orders" className={`nav-item ${location.pathname === '/free/orders' ? 'active' : ''}`}><ShoppingCart size={20}/> <span>Sales</span></Link>
                     <Link to="/free/settings" className={`nav-item ${location.pathname === '/free/settings' ? 'active' : ''}`}><Settings size={20}/> <span>Settings</span></Link>
+                    <Link to="/free/upgrade" className="nav-item" style={{color: '#d97706'}}>
+                        <Zap size={20}/> <span>Upgrade Plan</span>
+                    </Link>
                 </nav>
             </aside>
 
             <main className="main-content">
-                <h2 className="welcome-text">Payment Settings ⚙️</h2>
+                <div className="top-header">
+                    <div>
+                        <h1 className="welcome-text">Settings ⚙️</h1>
+                        <p className="sub-text">Configure your payment & store preferences.</p>
+                    </div>
+                </div>
                 
-                {loading ? <p>Loading settings...</p> : (
-                    <div className="glass-card" style={{maxWidth:'600px'}}>
+                {loading ? <p style={{padding:'20px'}}>Loading settings...</p> : (
+                    <div className="glass-card" style={{maxWidth:'600px', marginTop:'20px'}}>
                         <form onSubmit={handleUpdate}>
                             
                             {/* UPI ID INPUT */}
                             <label style={{fontWeight:'bold', display:'block', marginBottom:'8px'}}>UPI ID</label>
                             <input className="input-field" value={form.upiId} 
                                 onChange={e=>setForm({...form, upiId:e.target.value})} 
-                                placeholder="e.g. yourname@okaxis" />
+                                placeholder="e.g. yourname@okaxis" 
+                            />
                             
                             {/* QR CODE SECTION (With Preview) */}
                             <label style={{fontWeight:'bold', display:'block', marginTop:'20px', marginBottom:'10px'}}>Payment QR Code</label>

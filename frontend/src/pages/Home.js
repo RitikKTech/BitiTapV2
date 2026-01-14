@@ -164,7 +164,7 @@ const Home = () => {
                 <div className="price-amount">₹0</div>
                 <p style={{color:'#64748b'}}>Limit: ₹3000 Revenue</p>
                 <Link to="/free/signup" className="btn-outline">Start Free</Link>
-                <ul className="check-list"><li>✅ Sell up to ₹3000</li><li>✅ Direct UPI Payment</li></ul>
+                <ul className="check-list"><li>✅ Sell up to ₹3000</li><li>✅ Product: 15</li></ul>
             </div>
             {/* Monthly */}
             <div className="price-card" style={{border:'2px solid #2563eb', background:'#eff6ff'}}>
@@ -172,7 +172,7 @@ const Home = () => {
                 <div className="price-amount" style={{color:'#1e3a8a'}}>₹599<span style={{fontSize:'16px'}}>/mo</span></div>
                 <p style={{color:'#64748b'}}>Remove all limits</p>
                 <Link to="/payment/monthly" className="btn-filled">Get Monthly</Link>
-                <ul className="check-list"><li>🔥 Unlimited Revenue</li><li>🔥 Zero Commission</li></ul>
+                <ul className="check-list"><li>🔥 Unlimited Revenue</li><li>🔥 Product: 50</li></ul>
             </div>
              {/* Yearly */}
              <div className="price-card" style={{background:'#0f172a', color:'white', border:'none'}}>
@@ -180,7 +180,7 @@ const Home = () => {
                 <div className="price-amount">₹4999<span style={{fontSize:'16px', color:'#94a3b8'}}>/yr</span></div>
                 <p style={{color:'#4ade80'}}>Save ₹2,189 per year!</p>
                 <Link to="/payment/yearly" className="btn-outline" style={{background:'white', border:'none'}}>Get Yearly</Link>
-                <ul className="check-list" style={{color:'#cbd5e1'}}><li>⭐ Verified Badge</li><li>⭐ Priority Support</li></ul>
+                <ul className="check-list" style={{color:'#cbd5e1'}}><li>⭐ Unlimited Revenue</li><li>⭐ Unlimited Product</li></ul>
             </div>
         </div>
       </section>

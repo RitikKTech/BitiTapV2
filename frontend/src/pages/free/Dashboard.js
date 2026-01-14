@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, TrendingUp, ShoppingBag, PlusCircle } from 'lucide-react';
+// ✅ 1. 'Zap' icon add kiya (Upgrade ke liye)
+import { LayoutDashboard, Package, ShoppingCart, Settings, TrendingUp, ShoppingBag, PlusCircle, Zap } from 'lucide-react';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -36,10 +37,8 @@ const Dashboard = () => {
             console.log("🟢 3. Backend Response RAW:", res);
             console.log("🟢 4. Data Received:", res.data);
             
-            // Screen par dikhane ke liye debug string banayi
             setDebugInfo(`Success! Server Sent: Revenue=${res.data.revenue}, Sales=${res.data.totalSales}`);
 
-            // Agar backend data bhej raha hai par key alag hai to yahan pakda jayega
             if (res.data.revenue === undefined) {
                 console.warn("⚠️ WARNING: 'revenue' key missing in response!", res.data);
                 setDebugInfo("Error: Missing 'revenue' key in backend data");
@@ -76,7 +75,7 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
-            {/* --- 🛑 DEBUG BOX (REMOVE LATER) --- */}
+            {/* --- 🛑 DEBUG BOX (Keep Logic Safe) --- */}
             <div style={{
                 position: 'fixed', bottom: '10px', right: '10px', 
                 background: '#000', color: '#0f0', padding: '15px', 
@@ -96,6 +95,11 @@ const Dashboard = () => {
                     <Link to="/free/products" className="nav-item"><Package size={20}/> <span>Products</span></Link>
                     <Link to="/free/orders" className="nav-item"><ShoppingCart size={20}/> <span>Sales</span></Link>
                     <Link to="/free/settings" className="nav-item"><Settings size={20}/> <span>Settings</span></Link>
+                    
+                    {/* ✅ 2. NEW UPGRADE TAB (Orange Color) */}
+                    <Link to="/free/upgrade" className="nav-item" style={{color: '#d97706'}}>
+                        <Zap size={20}/> <span>Upgrade Plan</span>
+                    </Link>
                 </nav>
             </aside>
 
@@ -105,9 +109,17 @@ const Dashboard = () => {
                         <h1 className="welcome-text">Hello, {stats.sellerName} 👋</h1>
                         <p className="sub-text">Your business at a glance</p>
                     </div>
-                    {!isLimitReached && (
-                        <Link to="/free/add-product" className="btn-primary"><PlusCircle size={18}/> Add Product</Link>
-                    )}
+                    
+                    <div style={{display:'flex', gap:'10px'}}>
+                        {/* ✅ 3. Upgrade Button Header me bhi lagaya */}
+                        <Link to="/free/upgrade" className="btn-primary" style={{background:'#d97706', border:'none', display:'flex', alignItems:'center', gap:'5px'}}>
+                            <Zap size={18}/> Upgrade
+                        </Link>
+
+                        {!isLimitReached && (
+                            <Link to="/free/add-product" className="btn-primary"><PlusCircle size={18}/> Add Product</Link>
+                        )}
+                    </div>
                 </div>
 
                 <div className="glass-card">
