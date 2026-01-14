@@ -9,7 +9,6 @@ const FreeOrderSchema = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'freeProduct'
-        // Product delete ho jaye to bhi order rahega, isliye 'required' nahi lagaya
     },
     productTitle: {
         type: String,
@@ -25,14 +24,17 @@ const FreeOrderSchema = new mongoose.Schema({
     buyerEmail: { type: String, required: true },
     buyerPhone: { type: String, required: true },
 
-    // 💸 PAYMENT INFO (Feature #3)
+    // 💸 PAYMENT INFO
     utr: {
         type: String,
-        required: true // UTR dalna zaroori hai
+        required: true
     },
-    isApproved: {
-        type: Boolean,
-        default: false // Pehle false rahega, Seller approve karega tab true hoga
+    
+    // 🚨 MAIN FIX: 'isApproved' hata kar 'status' lagaya
+    status: {
+        type: String,
+        enum: ['pending', 'approved'],
+        default: 'pending' 
     },
     
     date: {

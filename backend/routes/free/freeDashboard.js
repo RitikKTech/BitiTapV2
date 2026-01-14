@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+
+// IMPORTS
 const FreeSeller = require('../../models/free/FreeSeller'); 
+const FreeProduct = require('../../models/free/FreeProduct');
 const FreeOrder = require('../../models/free/FreeOrder');
 
-// Auth Middleware
+// Middleware
 const auth = (req, res, next) => {
     const token = req.header('x-auth-token');
     if (!token) return res.status(401).json({ msg: "No token" });
@@ -15,34 +18,37 @@ const auth = (req, res, next) => {
     } catch (e) { res.status(400).json({ msg: "Invalid Token" }); }
 };
 
+// 👉 GET Stats Route
 router.get('/stats', auth, async (req, res) => {
     try {
-        const userId = req.user.user.id; // User ID from token
-        const user = await FreeSeller.findById(userId).select('-password');
+        const user = await FreeSeller.findById(req.user.user.id).select('-password');
         
-        if (!user) return res.json({ sellerName: 'Unknown', revenue: 0, totalSales: 0 });
+        if (!user) {
+            return res.json({ sellerName: 'Unknown', revenue: 0, totalSales: 0, productCount: 0 });
+        }
 
-        // ✅ FIX 1: SALES COUNT LOGIC
-        // Hum database se puchenge ki kitne orders 'approved' hain
+        // ✅ PRODUCT COUNT
+        const productCount = user.lifetimeProductCount || 0;
+
+        // ✅ TOTAL SALES COUNT (Sirf 'approved' wale gino)
         const totalSales = await FreeOrder.countDocuments({ 
-            seller: userId,
+            seller: req.user.user.id,
             status: 'approved' 
         });
 
-        // ✅ FIX 2: REVENUE
-        // Revenue database se direct uthayenge
-        const revenue = user.lifetimeRevenue || 0;
+        // ✅ REVENUE FIX (Database se direct uthao - Lifetime Revenue)
+        const currentRevenue = user.lifetimeRevenue || 0;
 
         res.json({
             sellerName: user.name,
-            revenue: revenue,
-            totalSales: totalSales, // Ab ye 0 nahi, sahi ginti dikhayega
-            productCount: user.lifetimeProductCount || 0,
+            revenue: currentRevenue,
+            totalSales: totalSales,
+            productCount: productCount,
             settings: user.settings || {}
         });
 
     } catch (err) {
-        console.error("Dashboard Error:", err.message);
+        console.error("Dashboard Stats Error:", err.message);
         res.status(500).send('Server Error');
     }
 });
