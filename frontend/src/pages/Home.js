@@ -171,7 +171,7 @@ const Home = () => {
                 <h3 style={{color:'#2563eb'}}>Monthly Pro</h3>
                 <div className="price-amount" style={{color:'#1e3a8a'}}>₹599<span style={{fontSize:'16px'}}>/mo</span></div>
                 <p style={{color:'#64748b'}}>Remove all limits</p>
-                <Link to="/payment/monthly" className="btn-filled">Get Monthly</Link>
+                <Link to="/checkout/silver" className="btn-filled">Get Monthly</Link>
                 <ul className="check-list"><li>🔥 Unlimited Revenue</li><li>🔥 Product: 50</li></ul>
             </div>
              {/* Yearly */}

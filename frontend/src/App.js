@@ -18,6 +18,9 @@ import FreeUpgrade from './pages/free/Upgrade';
 // 👇 1. NEW IMPORT (Public Buy Page)
 import FreeProductPublic from './pages/free/ProductPublic';
 
+//silver
+import CheckoutSilver from './pages/silver/CheckoutSilver';
+
 function App() {
   return (
     // 🛡️ future flags lagaye hain taaki console me yellow warnings na aayein
@@ -45,6 +48,7 @@ function App() {
 
         {/* 🔄 Catch-all: Galat link par Home bhej do */}
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/checkout/silver" element={<CheckoutSilver />} />
       </Routes>
     </Router>
   );

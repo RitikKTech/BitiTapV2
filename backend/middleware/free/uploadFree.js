@@ -1,18 +1,26 @@
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
-const { cloudinary, CloudinaryStorage } = require('../../config/cloudinary');
+require('dotenv').config();
+require('../../config/cloudinary'); // Cloudinary Config Load
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'bititap_free_uploads', // Cloudinary me is naam ka folder banega
-        allowed_formats: ['jpg', 'png', 'jpeg', 'zip', 'pdf', 'mp4'],
-        resource_type: 'auto' // Auto detect (Image/Video/Raw)
-    }
-});
+// Helper Function
+const createStorage = (folderPath) => {
+    return new CloudinaryStorage({
+        cloudinary: cloudinary,
+        params: {
+            folder: folderPath,
+            allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'zip'],
+            resource_type: 'auto'
+        },
+    });
+};
 
-const uploadFree = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB Limit (Free User)
-});
-
-module.exports = uploadFree;
+// 📂 EXPORTS FOR FREE USER
+module.exports = {
+    // Free Product Upload -> 'bititap_v2/free/products'
+    uploadFreeProduct: multer({ storage: createStorage('bititap_v2/free/products') }),
+    
+    // Free QR Upload -> 'bititap_v2/free/qr'
+    uploadFreeQr: multer({ storage: createStorage('bititap_v2/free/qr') })
+};
