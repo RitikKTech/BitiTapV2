@@ -1,45 +1,59 @@
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const path = require('path'); 
 require('dotenv').config();
-require('../../config/cloudinary'); // Cloudinary Config Load
+require('../../config/cloudinary'); 
 
-// Helper Function
-const createStorage = (folderPath) => {
-    return new CloudinaryStorage({
-        cloudinary: cloudinary,
-        params: {
+// 🧠 SMART STORAGE ENGINE (With Name Sanitizer)
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        
+        // 1. Extension nikalo
+        const ext = path.extname(file.originalname).toLowerCase();
+        
+        // 🚨 NAME CLEANER (Sabse Important Step)
+        // Spaces ko '_' bana do aur Brackets/Symbols hata do
+        let name = path.basename(file.originalname, ext);
+        name = name.replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+
+        let resourceType = 'auto';
+        let folderPath = 'bititap_v2/free/products';
+
+        // 🎯 2. Type Detection
+        if (['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) {
+            resourceType = 'image';
+        } 
+        else if (['.mp3', '.wav', '.mp4', '.mkv', '.mov', '.avi'].includes(ext)) {
+            resourceType = 'video'; 
+        } 
+        else {
+            resourceType = 'raw'; // PDF, Zip, Rar (Safe Mode)
+        }
+
+        // 📷 QR Code
+        if (file.fieldname === 'qrCode') {
+            folderPath = 'bititap_v2/free/qr';
+            resourceType = 'image';
+        }
+
+        return {
             folder: folderPath,
+            resource_type: resourceType,
             
-            // ✅ UPDATED FORMATS LIST (Audio, Video, Docs, Zip, Rar, Apk etc.)
-            allowed_formats: [
-                // Images
-                'jpg', 'png', 'jpeg', 'webp',
+            // ✅ Clean Name Use Karo
+            public_id: resourceType === 'raw' 
+                ? `${name}-${Date.now()}${ext}` 
+                : `${name}-${Date.now()}`,
                 
-                // Documents
-                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv',
-                
-                // Audio
-                'mp3', 'wav', 'm4a',
-                
-                // Video
-                'mp4', 'mkv', 'avi', 'mov',
-                
-                // Compressed / Software
-                'zip', 'rar', '7z', 'apk'
-            ],
-            
-            // 'auto' ka matlab Cloudinary khud detect karega ki ye image hai, video hai ya raw file
-            resource_type: 'auto' 
-        },
-    });
-};
+            format: resourceType === 'raw' ? undefined : ext.replace('.', '') 
+        };
+    },
+});
 
-// 📂 EXPORTS FOR FREE USER
+// 📂 EXPORTS
 module.exports = {
-    // Free Product Upload -> 'bititap_v2/free/products'
-    uploadFreeProduct: multer({ storage: createStorage('bititap_v2/free/products') }),
-    
-    // Free QR Upload -> 'bititap_v2/free/qr'
-    uploadFreeQr: multer({ storage: createStorage('bititap_v2/free/qr') })
+    uploadFreeProduct: multer({ storage: storage }),
+    uploadFreeQr: multer({ storage: storage })
 };
