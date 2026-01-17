@@ -10,8 +10,27 @@ const createStorage = (folderPath) => {
         cloudinary: cloudinary,
         params: {
             folder: folderPath,
-            allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'zip'],
-            resource_type: 'auto'
+            
+            // ✅ UPDATED FORMATS LIST (Audio, Video, Docs, Zip, Rar, Apk etc.)
+            allowed_formats: [
+                // Images
+                'jpg', 'png', 'jpeg', 'webp',
+                
+                // Documents
+                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv',
+                
+                // Audio
+                'mp3', 'wav', 'm4a',
+                
+                // Video
+                'mp4', 'mkv', 'avi', 'mov',
+                
+                // Compressed / Software
+                'zip', 'rar', '7z', 'apk'
+            ],
+            
+            // 'auto' ka matlab Cloudinary khud detect karega ki ye image hai, video hai ya raw file
+            resource_type: 'auto' 
         },
     });
 };

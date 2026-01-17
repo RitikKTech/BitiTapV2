@@ -2,14 +2,38 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../../middleware/free/auth');
 const FreeProduct = require('../../models/free/FreeProduct'); 
-const FreeSeller = require('../../models/free/FreeSeller'); // ✅ Seller Model Import (Zaroori hai)
+const FreeSeller = require('../../models/free/FreeSeller'); // ✅ Seller Model
 const { uploadFreeProduct } = require('../../middleware/free/uploadFree'); 
 
 // Debugging Log
 console.log("✅ Free Products Route Loaded Successfully");
 
 // ==========================================
-// 1️⃣ ADD PRODUCT (POST) + LIMIT CHECK + COUNTER UPDATE
+// 1️⃣ PUBLIC PRODUCT ROUTE (Missing Tha - Ab Add Kar Diya)
+// ==========================================
+// Note: Isme 'auth' nahi lagega kyunki Buyer login nahi hota
+router.get('/public/:id', async (req, res) => {
+    try {
+        // Product dhoondo aur Seller ki UPI/QR details bhi laao
+        const product = await FreeProduct.findById(req.params.id)
+            .populate('seller', 'name upiId qrCodeUrl'); 
+
+        if (!product) {
+            return res.status(404).json({ msg: 'Product not found' });
+        }
+
+        res.json(product);
+    } catch (err) {
+        console.error("❌ Public Fetch Error:", err.message);
+        if(err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Product not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// ==========================================
+// 2️⃣ ADD PRODUCT (POST) + REAL LIMIT CHECK
 // ==========================================
 router.post('/add', auth, uploadFreeProduct.single('file'), async (req, res) => {
     console.log("👉 Add Product Request Recieved");
@@ -17,12 +41,12 @@ router.post('/add', auth, uploadFreeProduct.single('file'), async (req, res) => 
     try {
         const { title, price, description } = req.body;
 
-        // 🛑 STEP 1: Check 15 Products Limit
-        const seller = await FreeSeller.findById(req.user.id);
+        // 🛑 STEP 1: Check 15 Products Limit (100% Accurate Fix)
+        // Hum Database se ginte hain ki abhi kitne product hain
+        const currentCount = await FreeProduct.countDocuments({ seller: req.user.id });
         
-        // Agar counter nahi hai to 0 maan lo, aur agar 15 se zyada hai to roko
-        const currentCount = seller.productsCount || 0; 
-        
+        console.log(`📊 Current Products: ${currentCount}/15`);
+
         if (currentCount >= 15) {
              console.log("❌ Limit Reached: 15/15");
              return res.status(400).json({ msg: "Free Plan Limit Reached (15/15). Upgrade to Silver!" });
@@ -51,12 +75,10 @@ router.post('/add', auth, uploadFreeProduct.single('file'), async (req, res) => 
 
         const product = await newProduct.save();
         console.log("✅ Product Saved to DB:", product.title);
-
-        // ➕ STEP 5: Increment Product Count (+1 Logic)
-        seller.productsCount = currentCount + 1;
-        await seller.save();
-        console.log(`✅ Counter Updated: ${seller.productsCount}/15`);
         
+        // (Optional) Analytics ke liye Lifetime Counter bada sakte hain
+        await FreeSeller.findByIdAndUpdate(req.user.id, { $inc: { lifetimeProductCount: 1 } });
+
         res.json(product);
 
     } catch (err) {
@@ -66,7 +88,7 @@ router.post('/add', auth, uploadFreeProduct.single('file'), async (req, res) => 
 });
 
 // ==========================================
-// 2️⃣ GET ALL PRODUCTS (GET)
+// 3️⃣ GET ALL PRODUCTS (GET)
 // ==========================================
 router.get('/', auth, async (req, res) => {
     try {
@@ -79,7 +101,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // ==========================================
-// 3️⃣ DELETE PRODUCT (DELETE) + DECREMENT COUNTER
+// 4️⃣ DELETE PRODUCT (DELETE)
 // ==========================================
 router.delete('/:id', auth, async (req, res) => {
     try {
@@ -92,12 +114,8 @@ router.delete('/:id', auth, async (req, res) => {
 
         await product.deleteOne();
 
-        // ➖ STEP 6: Decrement Counter (-1 Logic)
-        const seller = await FreeSeller.findById(req.user.id);
-        if (seller.productsCount > 0) {
-            seller.productsCount = seller.productsCount - 1;
-            await seller.save();
-        }
+        // Note: Delete hone par count apne aap kam ho jayega 
+        // kyunki hum ab seedha database se ginte hain (countDocuments)
 
         res.json({ msg: 'Product removed' });
     } catch (err) {

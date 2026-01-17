@@ -7,7 +7,7 @@ const FreeSeller = require('../../models/free/FreeSeller');
 const FreeProduct = require('../../models/free/FreeProduct');
 const FreeOrder = require('../../models/free/FreeOrder');
 
-// Middleware
+// Middleware (Tera provided code safe rakha hai)
 const auth = (req, res, next) => {
     const token = req.header('x-auth-token');
     if (!token) return res.status(401).json({ msg: "No token" });
@@ -27,8 +27,9 @@ router.get('/stats', auth, async (req, res) => {
             return res.json({ sellerName: 'Unknown', revenue: 0, totalSales: 0, productCount: 0 });
         }
 
-        // ✅ PRODUCT COUNT
-        const productCount = user.lifetimeProductCount || 0;
+        // ✅ PRODUCT COUNT FIX (Ab ye directly Database se ginega)
+        // Pehle 'user.lifetimeProductCount' tha jo sync nahi ho raha tha.
+        const productCount = await FreeProduct.countDocuments({ seller: req.user.user.id });
 
         // ✅ TOTAL SALES COUNT (Sirf 'approved' wale gino)
         const totalSales = await FreeOrder.countDocuments({ 
@@ -43,7 +44,7 @@ router.get('/stats', auth, async (req, res) => {
             sellerName: user.name,
             revenue: currentRevenue,
             totalSales: totalSales,
-            productCount: productCount,
+            productCount: productCount, // 👈 Ab yahan real count jayega
             settings: user.settings || {}
         });
 
